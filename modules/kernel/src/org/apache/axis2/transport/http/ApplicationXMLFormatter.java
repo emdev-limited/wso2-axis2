@@ -115,7 +115,19 @@ public class ApplicationXMLFormatter implements MessageFormatter {
 
     public void writeTo(MessageContext messageContext, OMOutputFormat format,
                         OutputStream outputStream, boolean preserve) throws AxisFault {
-
+    	// Fix for problems:
+    	// * http://stackoverflow.com/questions/13019908/wso2-xml-declaration
+    	// * http://stackoverflow.com/questions/42817929/wso2esb-how-to-add-xml-into-the-message-sent-to-pox-endpoint
+    	
+    	String xmlHeader = "<?xml version=\"1.0\" encoding=\"" + format.getCharSetEncoding() + "\"?>";
+        try {
+        	outputStream.write(xmlHeader.getBytes());
+        } catch (IOException e) {
+          throw new AxisFault("Unable to write XML declaration to output stream.", e);
+        }
+        
+        // end of fix
+        
         if (log.isDebugEnabled()) {
             log.debug("start writeTo()");
         }
